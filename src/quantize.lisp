@@ -18,11 +18,14 @@
       (when (equal (getf dp :date) date)
 	(setf datepacket dp)
 	(return)))
+    (unless datepacket
+      (setf datepacket (list :date (list year month day) :chunks ()))
+      (push datepacket *file*))
     (setf *datepacket* datepacket)))
 
 (defun get-max-index ()
   (let ((chunks (getf *datepacket* :chunks)))
-    (apply #'max (mapcar (lambda (dp) (getf dp :index)) chunks))))
+    (apply #'max (append (list 0) (mapcar (lambda (dp) (getf dp :index)) chunks)))))
 
 (defun add-chunk (duration description)
   (let ((max-index (get-max-index)))
@@ -40,7 +43,7 @@
       (let ((duration (getf chunk :duration)))
 	(format t "~a  |  ~a~%" duration (getf chunk :description))
 	(incf total duration)))
-    (format t "~%total: ~a~%" total)))
+    (format t "~%total: ~a (~ah ~am)~%" total (floor (/ total 60)) (mod total 60))))
 
 (defun help ()
   (print '(read-data-file (&optional path)))
