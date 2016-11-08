@@ -1,0 +1,3 @@
+planned features:
+
+turn the datapacket manipulation system into a true stack-based one, and allow for pushing, popping, picking, amending, deleting, etc.
