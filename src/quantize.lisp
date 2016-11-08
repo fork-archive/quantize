@@ -24,22 +24,29 @@
     (setf *datepacket* datepacket)))
 
 (defun get-time-contribution (chunk &optional (category 'school))
-  (if (case category
-	(school
-	 (member (getf chunk :description) '(ph319 ece321 ece321q ece331 ece371)))
-	(transit
-	 (member (getf chunk :description) '(bus-walking bus-riding)))
-	(personal
-	 (member (getf chunk :description) '(toodling coding))))
+  (if (member (getf chunk :description)
+	      (case category
+		   (school
+		    '(ph319 ece321 ece321q ece331 ece371 studying))
+		   (transit
+		    '(bus-walking bus-riding transit-to-school))
+		   (personal
+		    '(toodling coding))
+		   (hygiene
+		    '(hygiene))))
       (getf chunk :duration)
       0))
 
+(defun print-as-hm (time label)
+  (format t (concatenate 'string label "~a (~ah ~am)~%") time (floor (/ time 60)) (mod time 60)))
+
 (defun get-total-time-contribution (&optional (category 'school))
-  (apply #'+ (mapcar (lambda (c) (get-time-contribution c category)) (getf *datepacket* :chunks))))
+  (let ((time (apply #'+ (mapcar (lambda (c) (get-time-contribution c category)) (getf *datepacket* :chunks)))))
+    (print-as-hm time "~%total: ")))
 
 (defun get-max-index ()
   (let ((chunks (getf *datepacket* :chunks)))
-    (apply #'max (append (list 0) (mapcar (lambda (dp) (getf dp :index)) chunks)))))
+    (apply #'max (append (list -1) (mapcar (lambda (dp) (getf dp :index)) chunks)))))
 
 (defun add-chunk (duration description)
   (let ((max-index (get-max-index)))
@@ -57,7 +64,7 @@
       (let ((duration (getf chunk :duration)))
 	(format t "~a  |  ~a~%" duration (getf chunk :description))
 	(incf total duration)))
-    (format t "~%total: ~a (~ah ~am)~%" total (floor (/ total 60)) (mod total 60))))
+    (print-as-hm total "~%total: ")))
 
 (defun help ()
   (print '(read-data-file (&optional path)))
