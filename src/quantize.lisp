@@ -23,6 +23,20 @@
       (push datepacket *file*))
     (setf *datepacket* datepacket)))
 
+(defun get-time-contribution (chunk &optional (category 'school))
+  (if (case category
+	(school
+	 (member (getf chunk :description) '(ph319 ece321 ece321q ece331 ece371)))
+	(transit
+	 (member (getf chunk :description) '(bus-walking bus-riding)))
+	(personal
+	 (member (getf chunk :description) '(toodling coding))))
+      (getf chunk :duration)
+      0))
+
+(defun get-total-time-contribution (&optional (category 'school))
+  (apply #'+ (mapcar (lambda (c) (get-time-contribution c category)) (getf *datepacket* :chunks))))
+
 (defun get-max-index ()
   (let ((chunks (getf *datepacket* :chunks)))
     (apply #'max (append (list 0) (mapcar (lambda (dp) (getf dp :index)) chunks)))))
@@ -50,4 +64,6 @@
   (print '(select-date (year month day)))
   (print '(add-chunk (duration description)))
   (print '(write-data-file))
-  (print '(print-datepacket)))
+  (print '(print-datepacket))
+  (print '(get-time-contribution (chunk &optional (category 'school))))
+  (print '(get-total-time-contribution (&optional (category 'school)))))
