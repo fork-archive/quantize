@@ -103,7 +103,7 @@
   (format t "~%TAGS~%~%")
   (dolist (tag *tags*)
     (let ((tag-name (getf tag :name)))
-      (let ((time (reduce #'+ (mapcar (lambda (chunk) (getf chunk :duration)) (get-chunks-owned-by-tag tag-name)))))
+      (let ((time (reduce #'+ (mapcar (lambda (chunk) (getf chunk :duration)) (get-chunks-tagged tag-name)))))
         (when (plusp time)
           (format t "~4,' d  |  ~a~%" time tag-name))))))
 
@@ -146,4 +146,18 @@
   (print '(print-dates))
   (print '(tag-time tag))
   (print '(major-times))
+  (print '(pop-chunk))
   nil)
+
+(defun enable-linedit-export-quit ()
+  (setf (symbol-function (intern "EOF-HANDLER" :linedit))
+            (lambda (lisp-name quit-fn)
+              (declare (ignore lisp-name))
+              (handler-case
+                  (progn
+                    (export-data)
+                    (fresh-line)
+                    (funcall quit-fn))
+                (end-of-file ()
+                  (fresh-line)
+                  (funcall quit-fn))))))
