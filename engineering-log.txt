@@ -1,0 +1,5 @@
+2018-02-26:
+
+What the heck is a "datepacket"? Oh, I think that it's all the data for a single day, in plist format, with a :date key and a :chunks key holding a list of chunks.
+
+OK, let's say that we want to get the total amount of time spent on "life". We're going to want to iterate through every chunk today, and if "life" is somewhere in its parents, then we add it.
